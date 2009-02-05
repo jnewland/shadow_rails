@@ -1,4 +1,5 @@
 #!/bin/bash
+apt-get update
 
 REE="ruby-enterprise-1.8.6-20090201"
 
