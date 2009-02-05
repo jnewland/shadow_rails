@@ -1,37 +1,34 @@
 #!/bin/bash
+#config
+REE="ruby-enterprise-1.8.6-20090201"
+URL="http://rubyforge.org/frs/download.php/51100/$REE.tar.gz"
+
+echo "Updating Apt Sources"
 apt-get update
 
-REE="ruby-enterprise-1.8.6-20090201"
-
-echo "***Bootstrappin' the system!***"
-
-echo "Installing build packages"
+echo "Installing build environment"
 apt-get install -y build-essential zlib1g-dev libssl-dev libreadline5-dev
 
-#echo "install Ruby Unenterprise Edition"
-#apt-get install -y ruby
-
-pushd /tmp
 echo "Downloading REE"
-wget http://rubyforge.org/frs/download.php/51100/$REE.tar.gz
-echo "Untar REE"
+pushd /tmp
+wget $URL
+
+echo "Installing REE"
 tar xvzf $REE.tar.gz
-echo "Install REE to /opt/ruby-enterprise"
 ./$REE/installer --auto=/opt/ruby-enterprise
-echo "Put REE in path"
-echo 'PATH="/opt/ruby-enterprise/bin:$PATH"' >> /etc/environment
-source /etc/environment
+
+echo "Symlinking /opt/ruby-enterprise/bin/* to /usr/local/bin/"
+#We can't just add /opt/ruby-enterprise/bin to PATH because of SECURE_PATH issues
+#REE's 'gem' command is smart and does this for gem binaries in the future
+for file in `ls /opt/ruby-enterprise/bin`
+do
+  ln -nfs /opt/ruby-enterprise/bin/$file /usr/local/bin/$file
+done
+
 echo "Cleaning up REE download"
 rm -rf $REE*
 popd
 
-echo "Installing Puppet and Facter"
-gem install puppet --no-rdoc --no-ri
-gem install facter --version 1.5.2 --no-rdoc --no-ri
-
-echo "Installing RSpec"
-gem install rpec --no-rdoc --no-ri
-
 echo "Installing ShadowPuppet and ShadowFacter"
+gem install facter --version 1.5.2 --no-rdoc --no-ri
 gem install shadow_puppet shadow_facter --no-rdoc --no-ri
-
