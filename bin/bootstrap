@@ -1,7 +1,7 @@
 #!/bin/bash
-#config
-REE="ruby-enterprise-1.8.6-20090201"
-URL="http://rubyforge.org/frs/download.php/51100/$REE.tar.gz"
+
+# change this if you wants different rubies
+RUBY="ree"
 
 echo "Updating Apt Sources"
 apt-get update
@@ -9,25 +9,7 @@ apt-get update
 echo "Installing build environment"
 apt-get install -y build-essential zlib1g-dev libssl-dev libreadline5-dev
 
-echo "Downloading REE"
-pushd /tmp
-wget $URL
-
-echo "Installing REE"
-tar xvzf $REE.tar.gz
-./$REE/installer --auto=/opt/ruby-enterprise
-
-echo "Symlinking /opt/ruby-enterprise/bin/* to /usr/local/bin/"
-#We can't just add /opt/ruby-enterprise/bin to PATH because of SECURE_PATH issues
-#REE's 'gem' command is smart and does this for gem binaries in the future
-for file in `ls /opt/ruby-enterprise/bin`
-do
-  ln -nfs /opt/ruby-enterprise/bin/$file /usr/local/bin/$file
-done
-
-echo "Cleaning up REE download"
-rm -rf $REE*
-popd
+./bin/install_$RUBY
 
 echo "Installing ShadowPuppet and ShadowFacter"
 gem install facter --version 1.5.2 --no-rdoc --no-ri
